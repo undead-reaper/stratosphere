@@ -48,9 +48,13 @@ const LoginForm = ({ className, ...props }: ComponentProps<"form">) => {
         setAccountId(user.accountId);
       } catch (error) {
         if (error instanceof AppwriteException) {
-          toast.error(error.message);
+          toast.error("Unable to authenticate", {
+            description: error.message,
+          });
         } else {
-          toast.error("An unexpected error occurred. Please try again.");
+          toast.error("Unable to authenticate", {
+            description: "An unexpected error occurred.",
+          });
         }
       }
     });
@@ -65,7 +69,9 @@ const LoginForm = ({ className, ...props }: ComponentProps<"form">) => {
           {...props}
         >
           <div className="flex flex-col items-center gap-2 text-center">
-            <h1 className="text-2xl font-bold">Login to your account</h1>
+            <h1 className="text-2xl font-bold font-playfair-display">
+              Login to your account
+            </h1>
             <p className="text-muted-foreground text-sm text-balance">
               Login to your account to access your files
             </p>

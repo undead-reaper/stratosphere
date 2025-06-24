@@ -53,9 +53,13 @@ const SignupForm = ({ className, ...props }: ComponentProps<"form">) => {
         setAccountId(user.accountId);
       } catch (error) {
         if (error instanceof AppwriteException) {
-          toast.error(error.message);
+          toast.error("Unable to create account", {
+            description: error.message,
+          });
         } else {
-          toast.error("An unexpected error occurred. Please try again.");
+          toast.error("Unable to create account", {
+            description: "An unexpected error occurred.",
+          });
         }
       }
     });
@@ -70,7 +74,9 @@ const SignupForm = ({ className, ...props }: ComponentProps<"form">) => {
           {...props}
         >
           <div className="flex flex-col items-center gap-2 text-center">
-            <h1 className="text-2xl font-bold">Create an account</h1>
+            <h1 className="text-2xl font-bold font-playfair-display">
+              Create an account
+            </h1>
             <p className="text-muted-foreground text-sm text-balance">
               Create a new account to get started
             </p>

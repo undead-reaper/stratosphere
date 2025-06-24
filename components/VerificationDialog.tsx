@@ -62,9 +62,13 @@ const VerificationDialog = ({ email, accountId }: VerificationDialogProps) => {
         if (sessionId) route.replace("/");
       } catch (error) {
         if (error instanceof AppwriteException) {
-          toast.error(error.message);
+          toast.error("Failed to Verify OTP", {
+            description: error.message,
+          });
         } else {
-          toast.error("An unexpected error occurred. Please try again.");
+          toast.error("Failed to Verify OTP", {
+            description: "An unexpected error occurred.",
+          });
         }
       }
     });

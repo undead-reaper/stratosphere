@@ -1,10 +1,11 @@
 "use server";
 
-import { createAdminClient } from "@/appwrite/client";
+import { createAdminClient, createSessionClient } from "@/appwrite/client";
 import { clientEnv } from "@/env";
+import { parseStringify } from "@/lib/utils";
 import { cookies } from "next/headers";
+import { redirect, RedirectType } from "next/navigation";
 import { AppwriteException, ID, Query } from "node-appwrite";
-import { parseStringify } from "../utils";
 
 const getUserByEmail = async (email: string) => {
   const { databases } = await createAdminClient();
@@ -64,17 +65,18 @@ export const createAccount = async ({ fullName, email }: CreateUserParams) => {
 };
 
 export const loginWithEmail = async ({ email }: { email: string }) => {
-  const existingUser = await getUserByEmail(email);
-
-  if (!existingUser) {
-    throw new Error("User not found.");
+  try {
+    const existingUser = await getUserByEmail(email);
+    if (!existingUser) throw new Error("User not found");
+    await sendEmailOTP({ email });
+    return parseStringify({ accountId: existingUser.accountId });
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw error;
+    } else {
+      throw new Error("Failed to login with email");
+    }
   }
-
-  const accountId = await sendEmailOTP({ email });
-
-  if (accountId) throw new Error("Failed to send email OTP");
-
-  return parseStringify({ accountId });
 };
 
 type VerifyEmailOTPParams = {
@@ -88,7 +90,6 @@ export const verifyEmailOTP = async ({
 }: VerifyEmailOTPParams) => {
   try {
     const { account } = await createAdminClient();
-    console.log(accountId);
 
     const session = await account.createSession(accountId, secret);
 
@@ -106,5 +107,38 @@ export const verifyEmailOTP = async ({
     } else {
       throw new Error("Failed to verify email OTP");
     }
+  }
+};
+
+export const getCurrentUser = async () => {
+  const { databases, account } = await createSessionClient();
+
+  const result = await account.get();
+
+  const user = await databases.listDocuments(
+    clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
+    clientEnv.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID,
+    [Query.equal("accountId", result.$id)]
+  );
+
+  if (user.total <= 0) return null;
+
+  return parseStringify(user.documents[0]);
+};
+
+export const signOutUser = async () => {
+  const { account } = await createSessionClient();
+
+  try {
+    await account.deleteSession("current");
+    (await cookies()).delete("appwrite_session");
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw error;
+    } else {
+      throw new Error("Failed to sign out user");
+    }
+  } finally {
+    redirect("/login", RedirectType.replace);
   }
 };
