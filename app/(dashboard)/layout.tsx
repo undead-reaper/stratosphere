@@ -17,8 +17,11 @@ const DashboardLayout = async ({
     <SidebarProvider className="flex h-screen">
       <AppSidebar {...currentUser} />
       <section className="flex h-full w-full flex-1 flex-col">
-        <MobileNavigation />
-        <Header />
+        <MobileNavigation
+          userId={currentUser.$id}
+          accountId={currentUser.accountId}
+        />
+        <Header userId={currentUser.$id} accountId={currentUser.accountId} />
         <div className="w-full">{children}</div>
       </section>
     </SidebarProvider>
