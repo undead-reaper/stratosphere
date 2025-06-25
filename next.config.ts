@@ -18,6 +18,18 @@ const nextConfig: NextConfig = {
         pathname: "/api/**",
         search: "background=random",
       },
+      {
+        protocol: "https",
+        hostname: "fra.cloud.appwrite.io",
+        port: "",
+        pathname: "/v1/storage/buckets/**/files/**/view",
+      },
+      {
+        protocol: "https",
+        hostname: "fra.cloud.appwrite.io",
+        port: "",
+        pathname: "/v1/storage/buckets/**/files/**/preview",
+      },
     ],
   },
 };

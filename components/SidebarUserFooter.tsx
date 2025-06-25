@@ -23,7 +23,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AppwriteException } from "node-appwrite";
-import { startTransition, useTransition } from "react";
+import { useTransition } from "react";
 import { toast } from "sonner";
 
 interface SidebarUserFooterProps {
@@ -38,7 +38,7 @@ const SidebarUserFooter = ({
   avatar,
 }: SidebarUserFooterProps) => {
   const { isMobile } = useSidebar();
-  const [isPending, setTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
   const initials = fullName
     .split(" ")
     .map((name) => name.charAt(0).toUpperCase())

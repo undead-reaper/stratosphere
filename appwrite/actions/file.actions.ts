@@ -1,10 +1,11 @@
 "use server";
 
+import { getCurrentUser } from "@/appwrite/actions/user.actions";
 import { createAdminClient } from "@/appwrite/client";
 import { clientEnv } from "@/env";
 import { constructFileUrl, getFileType, parseStringify } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
-import { AppwriteException, ID } from "node-appwrite";
+import { AppwriteException, ID, Models, Query } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 
 export const uploadFile = async ({
@@ -12,7 +13,7 @@ export const uploadFile = async ({
   file,
   ownerId,
   path,
-}: UploadFileProps) => {
+}: UploadFileProps): Promise<Models.Document | null> => {
   const { storage, databases } = await createAdminClient();
 
   try {
@@ -57,6 +58,71 @@ export const uploadFile = async ({
       throw error;
     } else {
       throw new Error(`Failed to upload file: ${error}`);
+    }
+  }
+};
+
+const createQueries = (currentUser: Models.Document): string[] => {
+  const queries = [
+    Query.or([
+      Query.equal("owner", [currentUser.$id]),
+      Query.contains("users", [currentUser.email]),
+    ]),
+  ];
+  return queries;
+};
+
+export const getFiles = async (): Promise<
+  Models.DocumentList<Models.Document>
+> => {
+  const { databases } = await createAdminClient();
+
+  try {
+    const currentUser: Models.Document | null = await getCurrentUser();
+    if (!currentUser) throw new Error("User not authenticated");
+
+    const queries = createQueries(currentUser);
+
+    const files = await databases.listDocuments(
+      clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
+      clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
+      queries
+    );
+    return parseStringify(files);
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw error;
+    } else {
+      throw new Error(`Failed to get files: ${error}`);
+    }
+  }
+};
+
+export const renameFile = async ({
+  fileId,
+  name,
+  extension,
+  path,
+}: RenameFileProps) => {
+  try {
+    const { databases } = await createAdminClient();
+
+    const newName = `${name}.${extension}`;
+    const updatedFile = await databases.updateDocument(
+      clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
+      clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
+      fileId,
+      {
+        name: newName,
+      }
+    );
+    revalidatePath(path);
+    return parseStringify(updatedFile);
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw error;
+    } else {
+      throw new Error(`Failed to rename file: ${error}`);
     }
   }
 };

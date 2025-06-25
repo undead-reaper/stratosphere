@@ -70,5 +70,13 @@ export const getFileType = (fileName: string) => {
 };
 
 export const constructFileUrl = (bucketFileId: string) => {
-  return `${clientEnv.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${clientEnv.NEXT_PUBLIC_APPWRITE_BUCKET_ID}/files/${bucketFileId}/view?project=${clientEnv.NEXT_PUBLIC_APPWRITE_PROJECT_ID}}`;
+  return `${clientEnv.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${clientEnv.NEXT_PUBLIC_APPWRITE_BUCKET_ID}/files/${bucketFileId}/view?project=${clientEnv.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`;
+};
+
+export const constructPreviewUrl = (bucketFileId: string) => {
+  return `${clientEnv.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${clientEnv.NEXT_PUBLIC_APPWRITE_BUCKET_ID}/files/${bucketFileId}/preview?project=${clientEnv.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`;
+};
+
+export const constructDownloadUrl = (bucketFileId: string) => {
+  return `${clientEnv.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${clientEnv.NEXT_PUBLIC_APPWRITE_BUCKET_ID}/files/${bucketFileId}/download?project=${clientEnv.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`;
 };
