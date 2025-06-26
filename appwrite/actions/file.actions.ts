@@ -106,15 +106,14 @@ export const renameFile = async ({
 }: RenameFileProps) => {
   try {
     const { databases } = await createAdminClient();
-
-    const newName = `${name}.${extension}`;
+    const update = extension
+      ? { name: name, extension: extension }
+      : { name: name };
     const updatedFile = await databases.updateDocument(
       clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
       clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
       fileId,
-      {
-        name: newName,
-      }
+      update
     );
     revalidatePath(path);
     return parseStringify(updatedFile);
@@ -123,6 +122,108 @@ export const renameFile = async ({
       throw error;
     } else {
       throw new Error(`Failed to rename file: ${error}`);
+    }
+  }
+};
+
+interface ShareFileProps {
+  fileId: string;
+  email: string;
+  path: string;
+}
+
+export const shareFile = async ({ fileId, email, path }: ShareFileProps) => {
+  try {
+    const { databases } = await createAdminClient();
+    const currentFile = await databases.getDocument(
+      clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
+      clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
+      fileId
+    );
+
+    const updatedFile = await databases.updateDocument(
+      clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
+      clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
+      fileId,
+      {
+        users: [...currentFile.users, email],
+      }
+    );
+    revalidatePath(path);
+    return parseStringify(updatedFile);
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw error;
+    } else {
+      throw new Error(`Failed to share file: ${error}`);
+    }
+  }
+};
+
+export const removeShare = async ({ fileId, email, path }: ShareFileProps) => {
+  try {
+    const { databases } = await createAdminClient();
+    const currentFile = await databases.getDocument(
+      clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
+      clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
+      fileId
+    );
+
+    const updatedFile = await databases.updateDocument(
+      clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
+      clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
+      fileId,
+      {
+        users: currentFile.users.filter(
+          (userEmail: string) => userEmail !== email
+        ),
+      }
+    );
+    revalidatePath(path);
+    return parseStringify(updatedFile);
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw error;
+    } else {
+      throw new Error(`Failed to remove share from file: ${error}`);
+    }
+  }
+};
+
+interface DeleteFileProps {
+  fileId: string;
+  bucketField: string;
+  path: string;
+}
+
+export const deleteFile = async ({
+  fileId,
+  bucketField,
+  path,
+}: DeleteFileProps) => {
+  try {
+    const { databases, storage } = await createAdminClient();
+
+    const deletedFile = await databases.deleteDocument(
+      clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
+      clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
+      fileId
+    );
+
+    if (deletedFile) {
+      await storage.deleteFile(
+        clientEnv.NEXT_PUBLIC_APPWRITE_BUCKET_ID,
+        bucketField
+      );
+    }
+
+    revalidatePath(path);
+    return parseStringify({ status: "Success" });
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw error;
+    } else {
+      throw new Error(`Failed to remove share from file: ${error}`);
     }
   }
 };

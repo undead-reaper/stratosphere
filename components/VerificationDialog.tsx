@@ -82,7 +82,10 @@ const VerificationDialog = ({ email, accountId }: VerificationDialogProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent>
+      <DialogContent
+        onInteractOutside={(e) => e.preventDefault()}
+        showCloseButton={false}
+      >
         <DialogHeader>
           <DialogTitle>Enter your OTP</DialogTitle>
           <DialogDescription>

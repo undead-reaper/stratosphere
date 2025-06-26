@@ -1,5 +1,9 @@
 "use client";
 
+import DeleteDialog from "@/components/DeleteDiaog";
+import FileDetailsDialog from "@/components/FileDetailsDialog";
+import RenameDialog from "@/components/RenameDialog";
+import ShareDialog from "@/components/ShareDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +16,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { constructDownloadUrl } from "@/lib/utils";
 import Link from "next/link";
 import { Models } from "node-appwrite";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 const FileDropdown = ({
   children,
@@ -22,6 +26,15 @@ const FileDropdown = ({
   file: Models.Document;
 }>) => {
   const mobile = useIsMobile();
+  const [activeDialog, setActiveDialog] = useState<string | null>(null);
+
+  const openDialog = (dialogType: string) => {
+    setActiveDialog(dialogType);
+  };
+
+  const closeDialog = () => {
+    setActiveDialog(null);
+  };
 
   return (
     <div>
@@ -35,9 +48,15 @@ const FileDropdown = ({
             {file.name}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Rename</DropdownMenuItem>
-          <DropdownMenuItem>Details</DropdownMenuItem>
-          <DropdownMenuItem>Share</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openDialog("rename")}>
+            Rename
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openDialog("details")}>
+            Details
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openDialog("share")}>
+            Share
+          </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link
               href={constructDownloadUrl(file.bucketField)}
@@ -47,9 +66,35 @@ const FileDropdown = ({
               Download
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openDialog("delete")}>
+            Delete
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <RenameDialog
+        open={activeDialog === "rename"}
+        onOpenChange={closeDialog}
+        file={file}
+      />
+
+      <FileDetailsDialog
+        file={file}
+        open={activeDialog === "details"}
+        onOpenChange={closeDialog}
+      />
+
+      <ShareDialog
+        file={file}
+        open={activeDialog === "share"}
+        onOpenChange={closeDialog}
+      />
+
+      <DeleteDialog
+        file={file}
+        open={activeDialog === "delete"}
+        onOpenChange={closeDialog}
+      />
     </div>
   );
 };

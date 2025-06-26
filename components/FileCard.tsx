@@ -25,7 +25,7 @@ const FileCard = ({ file }: { file: Models.Document }) => {
             width={0}
             height={0}
             sizes="100vw"
-            className="object-cover w-full h-40 rounded-sm"
+            className="object-cover w-full h-50 md:h-30 xl:h-40 rounded-sm"
             alt={file.name}
           />
         ) : (
