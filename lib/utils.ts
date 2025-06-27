@@ -95,3 +95,20 @@ export const getFileTypeParams = (type: string): string[] => {
       return ["document"];
   }
 };
+
+export const getSearchParams = (type: string): string => {
+  switch (type) {
+    case "image":
+      return "images";
+    case "document":
+      return "documents";
+    case "video":
+      return "media";
+    case "audio":
+      return "media";
+    case "other":
+      return "others";
+    default:
+      return "documents";
+  }
+};

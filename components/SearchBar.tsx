@@ -1,13 +1,26 @@
+"use client";
+
+import SearchDialog from "@/components/SearchDialog";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import { useState } from "react";
 
 const SearchBar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  console.log(isOpen);
+
   return (
-    <>
-      <Button className="mb-5" variant="ghost" size="icon">
+    <div>
+      <Button
+        onClick={setIsOpen.bind(null, true)}
+        className="mb-5"
+        variant="ghost"
+        size="icon"
+      >
         <Search />
       </Button>
-    </>
+      <SearchDialog open={isOpen} onOpenChange={setIsOpen} />
+    </div>
   );
 };
 
