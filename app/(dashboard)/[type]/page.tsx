@@ -1,7 +1,8 @@
 import { getFiles } from "@/appwrite/actions/file.actions";
 import FileCard from "@/components/FileCard";
 import Sort from "@/components/Sort";
-import { getFileTypeParams } from "@/lib/utils";
+import { getFileTypeParams, getFormattedSize } from "@/lib/utils";
+import { AppwriteFileOutput, type FileType } from "@/types/AppwriteFile";
 import { Models } from "node-appwrite";
 
 const Page = async ({
@@ -13,16 +14,10 @@ const Page = async ({
 }) => {
   const { type } = await params;
   const { query, sort } = await searchParams;
-  const getSize = Intl.NumberFormat("en-US", {
-    notation: "compact",
-    style: "unit",
-    unit: "byte",
-    unitDisplay: "narrow",
-  });
 
-  const types = getFileTypeParams(type) as string[];
+  const types: FileType[] = getFileTypeParams(type);
 
-  const files: Models.DocumentList<Models.Document> = await getFiles({
+  const files: Models.DocumentList<AppwriteFileOutput> = await getFiles({
     types,
     query: query as string,
     sort: sort as string,
@@ -38,9 +33,9 @@ const Page = async ({
           <p className="text-sm font-medium text-muted-foreground">
             Total Size:{" "}
             <span>
-              {getSize.format(
-                files.documents.reduce((acc, file) => acc + file.size, 0)
-              )}
+              {getFormattedSize({
+                size: files.documents.reduce((acc, file) => acc + file.size, 0),
+              })}
             </span>
           </p>
         </div>

@@ -33,7 +33,7 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 const SignupForm = ({ className, ...props }: ComponentProps<"form">) => {
   const [isPending, startTransition] = useTransition();
-  const [accountId, setAccountId] = useState(null);
+  const [accountId, setAccountId] = useState<string | null>(null);
 
   const signupForm = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -46,11 +46,11 @@ const SignupForm = ({ className, ...props }: ComponentProps<"form">) => {
   const onSubmit = (values: SignupFormValues) => {
     startTransition(async () => {
       try {
-        const user = await createAccount({
+        const accountId = await createAccount({
           fullName: values.fullName,
           email: values.email,
         });
-        setAccountId(user.accountId);
+        setAccountId(accountId);
       } catch (error) {
         if (error instanceof AppwriteException) {
           toast.error("Unable to create account", {

@@ -1,3 +1,4 @@
+import FileDropdown from "@/components/FileDropdown";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -6,22 +7,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { constructPreviewUrl } from "@/lib/utils";
-import { format } from "date-fns";
+import { constructUrl, getFormattedDate } from "@/lib/utils";
+import { AppwriteFileOutput } from "@/types/AppwriteFile";
 import { MoreVertical } from "lucide-react";
 import Image from "next/image";
-import { Models } from "node-appwrite";
-import FileDropdown from "./FileDropdown";
 
-const FileCard = ({ file }: { file: Models.Document }) => {
-  const formattedCreatedDate = format(new Date(file.$createdAt), "MMM d, yyyy");
-
+const FileCard = ({ file }: { file: AppwriteFileOutput }) => {
   return (
     <Card className="flex-1">
       <CardContent>
         {file.type === "image" ? (
           <Image
-            src={constructPreviewUrl(file.bucketField)}
+            src={constructUrl({
+              bucketField: file.bucketField,
+              variant: "preview",
+            })}
             width={0}
             height={0}
             priority
@@ -46,7 +46,9 @@ const FileCard = ({ file }: { file: Models.Document }) => {
         <div className="flex-1 truncate">
           <CardTitle className="truncate line-clamp-1">{file.name}</CardTitle>
           <CardDescription className="text-xs mt-1">
-            <p>{formattedCreatedDate}</p>
+            <p>
+              {getFormattedDate({ date: file.$createdAt, variant: "compact" })}
+            </p>
           </CardDescription>
         </div>
         <FileDropdown file={file}>

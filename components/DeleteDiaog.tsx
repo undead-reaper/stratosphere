@@ -11,8 +11,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { AppwriteFileOutput } from "@/types/AppwriteFile";
 import { usePathname } from "next/navigation";
-import { AppwriteException, Models } from "node-appwrite";
+import { AppwriteException } from "node-appwrite";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
@@ -21,7 +22,7 @@ const DeleteDialog = ({
   open,
   onOpenChange,
 }: {
-  file: Models.Document;
+  file: AppwriteFileOutput;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) => {

@@ -1,15 +1,12 @@
 import { clientEnv } from "@/env";
+import { type FileType } from "@/types/AppwriteFile";
 import { clsx, type ClassValue } from "clsx";
+import { format } from "date-fns/format";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-export const parseStringify = (value: unknown) =>
-  JSON.parse(JSON.stringify(value));
-
-type FileType = "document" | "image" | "video" | "audio" | "other";
 
 const fileExtensionMap: Record<string, FileType> = {
   pdf: "document",
@@ -57,31 +54,33 @@ const fileExtensionMap: Record<string, FileType> = {
   flac: "audio",
 };
 
-export const getFileType = (fileName: string) => {
+export const getFileType = (
+  fileName: string
+): Partial<Record<FileType, string>> => {
   const extension = fileName.split(".").pop()?.toLowerCase();
 
   if (!extension) {
-    return { type: "other", extension: "" };
+    return { other: "" };
   }
 
   const type = fileExtensionMap[extension] || "other";
 
-  return { type, extension };
+  return { [type]: extension };
 };
 
-export const constructFileUrl = (bucketFileId: string) => {
-  return `${clientEnv.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${clientEnv.NEXT_PUBLIC_APPWRITE_BUCKET_ID}/files/${bucketFileId}/view?project=${clientEnv.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`;
+type UrlVariant = "file" | "preview" | "download";
+
+export const constructUrl = ({
+  bucketField,
+  variant,
+}: {
+  bucketField: string;
+  variant: UrlVariant;
+}) => {
+  return `${clientEnv.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${clientEnv.NEXT_PUBLIC_APPWRITE_BUCKET_ID}/files/${bucketField}/${variant}?project=${clientEnv.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`;
 };
 
-export const constructPreviewUrl = (bucketFileId: string) => {
-  return `${clientEnv.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${clientEnv.NEXT_PUBLIC_APPWRITE_BUCKET_ID}/files/${bucketFileId}/preview?project=${clientEnv.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`;
-};
-
-export const constructDownloadUrl = (bucketFileId: string) => {
-  return `${clientEnv.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${clientEnv.NEXT_PUBLIC_APPWRITE_BUCKET_ID}/files/${bucketFileId}/download?project=${clientEnv.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`;
-};
-
-export const getFileTypeParams = (type: string): string[] => {
+export const getFileTypeParams = (type: string): FileType[] => {
   switch (type) {
     case "documents":
       return ["document"];
@@ -96,7 +95,7 @@ export const getFileTypeParams = (type: string): string[] => {
   }
 };
 
-export const getSearchParams = (type: string): string => {
+export const getSearchParams = (type: FileType): string => {
   switch (type) {
     case "image":
       return "images";
@@ -112,3 +111,27 @@ export const getSearchParams = (type: string): string => {
       return "documents";
   }
 };
+
+type dateVariant = "compact" | "standard";
+
+export const getFormattedDate = ({
+  date,
+  variant,
+}: {
+  date: string;
+  variant: dateVariant;
+}): string => {
+  if (variant === "compact") {
+    return format(new Date(date), "MMM d, yyyy");
+  } else {
+    return format(new Date(date), "MMM d, yyyy hh:mm");
+  }
+};
+
+export const getFormattedSize = ({ size }: { size: number }): string =>
+  Intl.NumberFormat("en-US", {
+    notation: "compact",
+    style: "unit",
+    unit: "byte",
+    unitDisplay: "narrow",
+  }).format(size);

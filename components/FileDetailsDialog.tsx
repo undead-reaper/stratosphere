@@ -4,36 +4,19 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { constructPreviewUrl } from "@/lib/utils";
-import { format } from "date-fns";
+import { constructUrl, getFormattedDate, getFormattedSize } from "@/lib/utils";
+import { AppwriteFileOutput } from "@/types/AppwriteFile";
 import Image from "next/image";
-import { Models } from "node-appwrite";
 
 const FileDetailsDialog = ({
   file,
   open,
   onOpenChange,
 }: {
-  file: Models.Document;
+  file: AppwriteFileOutput;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) => {
-  const formattedCreatedDate = format(
-    new Date(file.$createdAt),
-    "MMM d, yyyy hh:mm"
-  );
-  const formattedUpdatedDate = format(
-    new Date(file.$updatedAt),
-    "MMM d, yyyy hh:mm"
-  );
-
-  const getSize = Intl.NumberFormat("en-US", {
-    notation: "compact",
-    style: "unit",
-    unit: "byte",
-    unitDisplay: "narrow",
-  });
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full md:max-w-xl!">
@@ -43,7 +26,10 @@ const FileDetailsDialog = ({
           <div className="h-40 w-60 items-center flex justify-center">
             {file.type === "image" ? (
               <Image
-                src={constructPreviewUrl(file.bucketField)}
+                src={constructUrl({
+                  bucketField: file.bucketField,
+                  variant: "preview",
+                })}
                 width={0}
                 height={0}
                 sizes="100vw"
@@ -63,21 +49,33 @@ const FileDetailsDialog = ({
           <div className="flex flex-col gap-2">
             <p className="text-xs">
               Created On:{" "}
-              <span className="font-bold">{formattedCreatedDate}</span>
+              <span className="font-bold">
+                {getFormattedDate({
+                  date: file.$createdAt,
+                  variant: "standard",
+                })}
+              </span>
             </p>
             <p className="text-xs">
               Last Modified:{" "}
-              <span className="font-bold">{formattedUpdatedDate}</span>
+              <span className="font-bold">
+                {getFormattedDate({
+                  date: file.$updatedAt,
+                  variant: "standard",
+                })}
+              </span>
             </p>
             <p className="text-xs">
-              Owner: <span className="font-bold">{file.owner.fullName}</span>
+              Owner: <span className="font-bold">{file.owner.email}</span>
             </p>
             <p className="text-xs">
               Type: <span className="font-bold capitalize">{file.type}</span>
             </p>
             <p className="text-xs">
               Size:{" "}
-              <span className="font-bold">{getSize.format(file.size)}</span>
+              <span className="font-bold">
+                {getFormattedSize({ size: file.size })}
+              </span>
             </p>
           </div>
         </div>

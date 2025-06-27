@@ -44,8 +44,8 @@ const LoginForm = ({ className, ...props }: ComponentProps<"form">) => {
   const onSubmit = (values: LoginFormValues) => {
     startTransition(async () => {
       try {
-        const user = await loginWithEmail({ email: values.email });
-        setAccountId(user.accountId);
+        const accountId = await loginWithEmail({ email: values.email });
+        setAccountId(accountId);
       } catch (error) {
         if (error instanceof AppwriteException) {
           toast.error("Unable to authenticate", {

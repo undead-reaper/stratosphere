@@ -1,5 +1,17 @@
-import { NavItem } from "@/types/NavItem";
-import { ChartPie, File, Film, Image, LayoutDashboard } from "lucide-react";
+import {
+  ChartPie,
+  File,
+  Film,
+  Image,
+  LayoutDashboard,
+  LucideIcon,
+} from "lucide-react";
+
+type NavItem = {
+  name: string;
+  href: string;
+  icon: LucideIcon;
+};
 
 export const NavItems: NavItem[] = [
   {

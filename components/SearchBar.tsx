@@ -7,7 +7,6 @@ import { useState } from "react";
 
 const SearchBar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  console.log(isOpen);
 
   return (
     <div>

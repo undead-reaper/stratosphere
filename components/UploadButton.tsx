@@ -46,7 +46,6 @@ const UploadButton = ({ ownerId, accountId }: UploadFileProps) => {
           description: `${file.name}`,
         });
       });
-      console.log("Files uploaded:", acceptedFiles);
     },
     [accountId, ownerId, path]
   );

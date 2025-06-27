@@ -3,17 +3,30 @@
 import { getCurrentUser } from "@/appwrite/actions/user.actions";
 import { createAdminClient } from "@/appwrite/client";
 import { clientEnv } from "@/env";
-import { constructFileUrl, getFileType, parseStringify } from "@/lib/utils";
+import { constructUrl, getFileType } from "@/lib/utils";
+import {
+  type AppwriteFileInput,
+  type AppwriteFileOutput,
+  FileType,
+} from "@/types/AppwriteFile";
+import { AppwriteUserOutput } from "@/types/AppwriteUser";
 import { revalidatePath } from "next/cache";
 import { AppwriteException, ID, Models, Query } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
+
+type UploadFileProps = {
+  file: File;
+  ownerId: string;
+  accountId: string;
+  path: string;
+};
 
 export const uploadFile = async ({
   accountId,
   file,
   ownerId,
   path,
-}: UploadFileProps): Promise<Models.Document | null> => {
+}: UploadFileProps): Promise<AppwriteFileInput | null> => {
   const { storage, databases } = await createAdminClient();
 
   try {
@@ -24,11 +37,14 @@ export const uploadFile = async ({
       inputFile
     );
 
-    const fileDocument = {
-      type: getFileType(bucketFile.name).type,
+    const type: FileType = Object.keys(getFileType(file.name))[0] as FileType;
+    const extension: string = Object.values(getFileType(file.name))[0];
+
+    const fileDocument: Partial<AppwriteFileInput> = {
+      type: type,
       name: bucketFile.name,
-      url: constructFileUrl(bucketFile.$id),
-      extension: getFileType(bucketFile.name).extension,
+      url: constructUrl({ bucketField: bucketFile.$id, variant: "file" }),
+      extension: extension,
       size: bucketFile.sizeOriginal,
       owner: ownerId,
       accountId,
@@ -37,7 +53,7 @@ export const uploadFile = async ({
     };
 
     const newFile = await databases
-      .createDocument(
+      .createDocument<AppwriteFileInput>(
         clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
         clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
         ID.unique(),
@@ -52,7 +68,7 @@ export const uploadFile = async ({
       });
 
     revalidatePath(path);
-    return parseStringify(newFile);
+    return newFile;
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw error;
@@ -63,7 +79,7 @@ export const uploadFile = async ({
 };
 
 const createQueries = (
-  currentUser: Models.Document,
+  currentUser: AppwriteUserOutput,
   types: string[],
   query: string,
   sort: string
@@ -98,24 +114,24 @@ export const getFiles = async ({
   query = "",
   sort = "$createdAt-desc",
 }: {
-  types: string[];
+  types: FileType[];
   query?: string;
   sort?: string;
-}): Promise<Models.DocumentList<Models.Document>> => {
+}): Promise<Models.DocumentList<AppwriteFileOutput>> => {
   const { databases } = await createAdminClient();
 
   try {
-    const currentUser: Models.Document | null = await getCurrentUser();
+    const currentUser: AppwriteUserOutput | null = await getCurrentUser();
     if (!currentUser) throw new Error("User not authenticated");
 
     const queries = createQueries(currentUser, types, query, sort);
 
-    const files = await databases.listDocuments(
+    const files = await databases.listDocuments<AppwriteFileOutput>(
       clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
       clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
       queries
     );
-    return parseStringify(files);
+    return files;
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw error;
@@ -125,25 +141,32 @@ export const getFiles = async ({
   }
 };
 
+type RenameFileProps = {
+  fileId: string;
+  name: string;
+  extension?: string;
+  path: string;
+};
+
 export const renameFile = async ({
   fileId,
   name,
   extension,
   path,
-}: RenameFileProps) => {
+}: RenameFileProps): Promise<AppwriteFileOutput> => {
   try {
     const { databases } = await createAdminClient();
     const update = extension
       ? { name: name, extension: extension }
       : { name: name };
-    const updatedFile = await databases.updateDocument(
+    const updatedFile = await databases.updateDocument<AppwriteFileOutput>(
       clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
       clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
       fileId,
       update
     );
     revalidatePath(path);
-    return parseStringify(updatedFile);
+    return updatedFile;
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw error;
@@ -159,16 +182,20 @@ interface ShareFileProps {
   path: string;
 }
 
-export const shareFile = async ({ fileId, email, path }: ShareFileProps) => {
+export const shareFile = async ({
+  fileId,
+  email,
+  path,
+}: ShareFileProps): Promise<AppwriteFileOutput> => {
   try {
     const { databases } = await createAdminClient();
-    const currentFile = await databases.getDocument(
+    const currentFile = await databases.getDocument<AppwriteFileOutput>(
       clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
       clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
       fileId
     );
 
-    const updatedFile = await databases.updateDocument(
+    const updatedFile = await databases.updateDocument<AppwriteFileOutput>(
       clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
       clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
       fileId,
@@ -177,7 +204,7 @@ export const shareFile = async ({ fileId, email, path }: ShareFileProps) => {
       }
     );
     revalidatePath(path);
-    return parseStringify(updatedFile);
+    return updatedFile;
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw error;
@@ -187,16 +214,20 @@ export const shareFile = async ({ fileId, email, path }: ShareFileProps) => {
   }
 };
 
-export const removeShare = async ({ fileId, email, path }: ShareFileProps) => {
+export const removeShare = async ({
+  fileId,
+  email,
+  path,
+}: ShareFileProps): Promise<AppwriteFileOutput> => {
   try {
     const { databases } = await createAdminClient();
-    const currentFile = await databases.getDocument(
+    const currentFile = await databases.getDocument<AppwriteFileOutput>(
       clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
       clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
       fileId
     );
 
-    const updatedFile = await databases.updateDocument(
+    const updatedFile = await databases.updateDocument<AppwriteFileOutput>(
       clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
       clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
       fileId,
@@ -207,7 +238,7 @@ export const removeShare = async ({ fileId, email, path }: ShareFileProps) => {
       }
     );
     revalidatePath(path);
-    return parseStringify(updatedFile);
+    return updatedFile;
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw error;
@@ -227,7 +258,7 @@ export const deleteFile = async ({
   fileId,
   bucketField,
   path,
-}: DeleteFileProps) => {
+}: DeleteFileProps): Promise<boolean> => {
   try {
     const { databases, storage } = await createAdminClient();
 
@@ -245,7 +276,7 @@ export const deleteFile = async ({
     }
 
     revalidatePath(path);
-    return parseStringify({ status: "Success" });
+    return true;
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw error;

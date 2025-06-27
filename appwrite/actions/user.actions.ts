@@ -2,14 +2,16 @@
 
 import { createAdminClient, createSessionClient } from "@/appwrite/client";
 import { clientEnv } from "@/env";
-import { parseStringify } from "@/lib/utils";
+import { type AppwriteUserOutput } from "@/types/AppwriteUser";
 import { cookies } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
 import { AppwriteException, ID, Query } from "node-appwrite";
 
-const getUserByEmail = async (email: string) => {
+const getUserByEmail = async (
+  email: string
+): Promise<AppwriteUserOutput | null> => {
   const { databases } = await createAdminClient();
-  const result = await databases.listDocuments(
+  const result = await databases.listDocuments<AppwriteUserOutput>(
     clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
     clientEnv.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID,
     [Query.equal("email", [email])]
@@ -18,7 +20,11 @@ const getUserByEmail = async (email: string) => {
   return result.total > 0 ? result.documents[0] : null;
 };
 
-export const sendEmailOTP = async ({ email }: { email: string }) => {
+export const sendEmailOTP = async ({
+  email,
+}: {
+  email: string;
+}): Promise<string> => {
   const { account } = await createAdminClient();
 
   try {
@@ -38,7 +44,10 @@ type CreateUserParams = {
   email: string;
 };
 
-export const createAccount = async ({ fullName, email }: CreateUserParams) => {
+export const createAccount = async ({
+  fullName,
+  email,
+}: CreateUserParams): Promise<string> => {
   const existingUser = await getUserByEmail(email);
   const accountId = await sendEmailOTP({ email });
   if (!accountId) throw new Error("Failed to send OTP");
@@ -61,15 +70,19 @@ export const createAccount = async ({ fullName, email }: CreateUserParams) => {
     );
   }
 
-  return parseStringify({ accountId });
+  return accountId;
 };
 
-export const loginWithEmail = async ({ email }: { email: string }) => {
+export const loginWithEmail = async ({
+  email,
+}: {
+  email: string;
+}): Promise<string> => {
   try {
     const existingUser = await getUserByEmail(email);
     if (!existingUser) throw new Error("User not found");
     await sendEmailOTP({ email });
-    return parseStringify({ accountId: existingUser.accountId });
+    return existingUser.accountId;
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw error;
@@ -87,7 +100,7 @@ type VerifyEmailOTPParams = {
 export const verifyEmailOTP = async ({
   accountId,
   secret,
-}: VerifyEmailOTPParams) => {
+}: VerifyEmailOTPParams): Promise<string> => {
   try {
     const { account } = await createAdminClient();
 
@@ -100,7 +113,7 @@ export const verifyEmailOTP = async ({
       secure: true,
     });
 
-    return parseStringify({ accountId: session.$id });
+    return session.$id;
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw error;
@@ -110,12 +123,12 @@ export const verifyEmailOTP = async ({
   }
 };
 
-export const getCurrentUser = async () => {
+export const getCurrentUser = async (): Promise<AppwriteUserOutput | null> => {
   const { databases, account } = await createSessionClient();
 
   const result = await account.get();
 
-  const user = await databases.listDocuments(
+  const user = await databases.listDocuments<AppwriteUserOutput>(
     clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
     clientEnv.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID,
     [Query.equal("accountId", result.$id)]
@@ -123,10 +136,10 @@ export const getCurrentUser = async () => {
 
   if (user.total <= 0) return null;
 
-  return parseStringify(user.documents[0]);
+  return user.documents[0];
 };
 
-export const signOutUser = async () => {
+export const signOutUser = async (): Promise<void> => {
   const { account } = await createSessionClient();
 
   try {

@@ -1,7 +1,14 @@
 import { getFiles } from "@/appwrite/actions/file.actions";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { getSearchParams } from "@/lib/utils";
-import { format } from "date-fns";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { getFormattedDate, getSearchParams } from "@/lib/utils";
+import { AppwriteFileOutput } from "@/types/AppwriteFile";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -9,13 +16,6 @@ import { AppwriteException, Models } from "node-appwrite";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "./ui/dialog";
-import { ScrollArea } from "./ui/scroll-area";
 
 const SearchDialog = ({
   open,
@@ -29,7 +29,7 @@ const SearchDialog = ({
   const [query, setQuery] = useState(searchQuery);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] =
-    useState<Models.DocumentList<Models.Document> | null>(null);
+    useState<Models.DocumentList<AppwriteFileOutput> | null>(null);
   const [debouncedQuery] = useDebounce(query, 500);
 
   useEffect(() => {
@@ -66,7 +66,7 @@ const SearchDialog = ({
   const showEmptyList =
     (results?.total === 0 || results === null) && query && !isLoading;
 
-  const handleItemClick = (file: Models.Document) => {
+  const handleItemClick = (file: AppwriteFileOutput) => {
     const query = getSearchParams(file.type);
     onOpenChange(false);
     setResults(null);
@@ -113,7 +113,10 @@ const SearchDialog = ({
                   <p className="text-xs md:text-sm text-muted-foreground space-x-4">
                     <strong>{file.owner.fullName}</strong>
                     <span>
-                      {format(new Date(file.$updatedAt), "MMM d, yyyy")}
+                      {getFormattedDate({
+                        date: file.$updatedAt,
+                        variant: "compact",
+                      })}
                     </span>
                   </p>
                 </div>

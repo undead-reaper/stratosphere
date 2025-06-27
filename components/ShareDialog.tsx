@@ -1,6 +1,7 @@
 "use client";
 
 import { removeShare, shareFile } from "@/appwrite/actions/file.actions";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,15 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { X } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { AppwriteException, Models } from "node-appwrite";
-import { useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod/v4";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   Form,
   FormControl,
@@ -27,9 +19,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "./ui/form";
-import { Input } from "./ui/input";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { AppwriteFileOutput } from "@/types/AppwriteFile";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { X } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { AppwriteException } from "node-appwrite";
+import { useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod/v4";
 
 const shareDialogSchema = z.object({
   email: z.email(),
@@ -42,7 +47,7 @@ const ShareDialog = ({
   open,
   onOpenChange,
 }: {
-  file: Models.Document;
+  file: AppwriteFileOutput;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) => {

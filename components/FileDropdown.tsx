@@ -13,9 +13,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { constructDownloadUrl } from "@/lib/utils";
+import { constructUrl } from "@/lib/utils";
+import { AppwriteFileOutput } from "@/types/AppwriteFile";
 import Link from "next/link";
-import { Models } from "node-appwrite";
 import { ReactNode, useState } from "react";
 
 const FileDropdown = ({
@@ -23,7 +23,7 @@ const FileDropdown = ({
   file,
 }: Readonly<{
   children: ReactNode;
-  file: Models.Document;
+  file: AppwriteFileOutput;
 }>) => {
   const mobile = useIsMobile();
   const [activeDialog, setActiveDialog] = useState<string | null>(null);
@@ -59,7 +59,10 @@ const FileDropdown = ({
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link
-              href={constructDownloadUrl(file.bucketField)}
+              href={constructUrl({
+                bucketField: file.bucketField,
+                variant: "download",
+              })}
               download={file.name}
               rel="noopener noreferrer"
             >

@@ -1,6 +1,7 @@
 "use client";
 
 import { renameFile } from "@/appwrite/actions/file.actions";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -12,14 +13,14 @@ import {
 } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { AppwriteFileOutput } from "@/types/AppwriteFile";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePathname } from "next/navigation";
-import { AppwriteException, Models } from "node-appwrite";
+import { AppwriteException } from "node-appwrite";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod/v4";
-import { Button } from "./ui/button";
 
 const renameDialogSchema = z.object({
   newName: z.string().nonempty(),
@@ -34,7 +35,7 @@ const RenameDialog = ({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  file: Models.Document;
+  file: AppwriteFileOutput;
 }) => {
   const [isPending, startTransition] = useTransition();
   const path = usePathname();
@@ -47,13 +48,11 @@ const RenameDialog = ({
   });
 
   const onSubmit = (values: RenameDialogType) => {
-    console.log("Renaming file:", values.newName);
     const extensionParts = values.newName?.split(".");
     const newExtension =
       extensionParts && extensionParts.length > 1
         ? extensionParts.pop()
         : undefined;
-    console.log(newExtension);
 
     startTransition(async () => {
       const finalName = !!newExtension
