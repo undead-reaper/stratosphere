@@ -1,4 +1,5 @@
 import { Earth } from "lucide-react";
+import Image from "next/image";
 import { ReactNode } from "react";
 
 export default function AuthLayout({
@@ -18,8 +19,9 @@ export default function AuthLayout({
         {children}
       </div>
       <div className="bg-muted relative hidden lg:block">
-        <img
+        <Image
           src="/images/auth-hero.jpg"
+          fill
           alt="Image"
           className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
         />

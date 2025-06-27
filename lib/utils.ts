@@ -80,3 +80,18 @@ export const constructPreviewUrl = (bucketFileId: string) => {
 export const constructDownloadUrl = (bucketFileId: string) => {
   return `${clientEnv.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${clientEnv.NEXT_PUBLIC_APPWRITE_BUCKET_ID}/files/${bucketFileId}/download?project=${clientEnv.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`;
 };
+
+export const getFileTypeParams = (type: string): string[] => {
+  switch (type) {
+    case "documents":
+      return ["document"];
+    case "images":
+      return ["image"];
+    case "media":
+      return ["video", "audio"];
+    case "others":
+      return ["other"];
+    default:
+      return ["document"];
+  }
+};

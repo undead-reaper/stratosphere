@@ -1,7 +1,14 @@
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 
 const SearchBar = () => {
-  return <Input placeholder="Search" className="w-sm mr-auto" />;
+  return (
+    <>
+      <Button className="mb-5" variant="ghost" size="icon">
+        <Search />
+      </Button>
+    </>
+  );
 };
 
 export default SearchBar;

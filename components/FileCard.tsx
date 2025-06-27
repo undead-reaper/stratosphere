@@ -24,6 +24,7 @@ const FileCard = ({ file }: { file: Models.Document }) => {
             src={constructPreviewUrl(file.bucketField)}
             width={0}
             height={0}
+            priority
             sizes="100vw"
             className="object-cover w-full h-50 md:h-30 xl:h-40 rounded-sm"
             alt={file.name}
@@ -33,6 +34,7 @@ const FileCard = ({ file }: { file: Models.Document }) => {
             <Image
               src={`/icons/${file.type}.svg`}
               width={32}
+              priority
               height={32}
               alt={file.type}
               className="dark:invert"

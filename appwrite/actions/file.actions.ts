@@ -62,26 +62,53 @@ export const uploadFile = async ({
   }
 };
 
-const createQueries = (currentUser: Models.Document): string[] => {
+const createQueries = (
+  currentUser: Models.Document,
+  types: string[],
+  query: string,
+  sort: string
+): string[] => {
   const queries = [
     Query.or([
       Query.equal("owner", [currentUser.$id]),
       Query.contains("users", [currentUser.email]),
     ]),
   ];
+
+  if (types.length > 0) {
+    queries.push(Query.equal("type", types));
+  }
+  if (query) {
+    queries.push(Query.contains("name", query));
+  }
+
+  if (sort) {
+    const [sortBy, orderBy] = sort.split("-");
+
+    queries.push(
+      orderBy === "asc" ? Query.orderAsc(sortBy) : Query.orderDesc(sortBy)
+    );
+  }
+
   return queries;
 };
 
-export const getFiles = async (): Promise<
-  Models.DocumentList<Models.Document>
-> => {
+export const getFiles = async ({
+  types,
+  query = "",
+  sort = "$createdAt-desc",
+}: {
+  types: string[];
+  query?: string;
+  sort?: string;
+}): Promise<Models.DocumentList<Models.Document>> => {
   const { databases } = await createAdminClient();
 
   try {
     const currentUser: Models.Document | null = await getCurrentUser();
     if (!currentUser) throw new Error("User not authenticated");
 
-    const queries = createQueries(currentUser);
+    const queries = createQueries(currentUser, types, query, sort);
 
     const files = await databases.listDocuments(
       clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,

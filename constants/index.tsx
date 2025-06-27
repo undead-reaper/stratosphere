@@ -28,3 +28,43 @@ export const NavItems: NavItem[] = [
     icon: ChartPie,
   },
 ];
+
+type SortType = {
+  label: string;
+  value: string;
+};
+
+export const sortTypes: SortType[] = [
+  {
+    label: "Date created (newest)",
+    value: "$createdAt-desc",
+  },
+  {
+    label: "Created Date (oldest)",
+    value: "$createdAt-asc",
+  },
+  {
+    label: "Date modified (newest)",
+    value: "$updatedAt-desc",
+  },
+  {
+    label: "Date modified (oldest)",
+    value: "$updatedAt-asc",
+  },
+  {
+    label: "Name (A-Z)",
+    value: "name-asc",
+  },
+  {
+    label: "Name (Z-A)",
+    value: "name-desc",
+  },
+  {
+    label: "Size (Highest)",
+    value: "size-desc",
+  },
+  {
+    label: "Size (Lowest)",
+    value: "size-asc",
+  },
+];

@@ -9,7 +9,7 @@ const Header = ({
   accountId: string;
 }) => {
   return (
-    <header className="flex-row items-center justify-start gap-3 px-5 hidden md:flex py-5">
+    <header className="flex-row justify-end items-center gap-3 px-5 hidden md:flex py-5">
       <SearchBar />
       <UploadButton ownerId={userId} accountId={accountId} />
     </header>
