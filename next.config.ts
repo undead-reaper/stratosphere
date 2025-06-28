@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   experimental: {
     reactCompiler: true,
+    nodeMiddleware: true,
     serverActions: {
       bodySizeLimit: "50mb",
     },

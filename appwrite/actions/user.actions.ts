@@ -5,6 +5,7 @@ import { clientEnv } from "@/env";
 import { type AppwriteUserOutput } from "@/types/AppwriteUser";
 import { cookies } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
+import { NextRequest } from "next/server";
 import { AppwriteException, ID, Query } from "node-appwrite";
 
 const getUserByEmail = async (
@@ -153,5 +154,27 @@ export const signOutUser = async (): Promise<void> => {
     }
   } finally {
     redirect("/login", RedirectType.replace);
+  }
+};
+
+export const getAuthStatus = async ({
+  req,
+}: {
+  req: NextRequest;
+}): Promise<boolean> => {
+  const isAuthenticated = req.cookies.get("appwrite_session") !== undefined;
+  if (!isAuthenticated) return false;
+  try {
+    const { account } = await createSessionClient();
+    const user = await account.get();
+    return Boolean(user);
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      console.error("Authentication error:", error.message);
+      throw error;
+    } else {
+      console.error("Unexpected error:", error);
+      throw new Error("An unexpected error occurred.");
+    }
   }
 };

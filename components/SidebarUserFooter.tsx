@@ -53,10 +53,6 @@ const SidebarUserFooter = ({
           toast.error("Failed to Sign Out", {
             description: error.message,
           });
-        } else {
-          toast.error("Failed to Sign Out", {
-            description: "An unexpected error occurred.",
-          });
         }
       }
     });

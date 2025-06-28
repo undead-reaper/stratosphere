@@ -21,6 +21,7 @@ export default function AuthLayout({
       <div className="bg-muted relative hidden lg:block">
         <Image
           src="/images/auth-hero.jpg"
+          priority
           fill
           alt="Image"
           className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
