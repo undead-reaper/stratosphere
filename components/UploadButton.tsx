@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { usePathname } from "next/navigation";
 import { AppwriteException } from "node-appwrite";
 import { useCallback } from "react";
-import Dropzone from "react-dropzone";
+import Dropzone, { DropEvent, FileRejection } from "react-dropzone";
 import { toast } from "sonner";
 
 export interface UploadFileProps {
@@ -50,11 +50,30 @@ const UploadButton = ({ ownerId, accountId }: UploadFileProps) => {
     [accountId, ownerId, path]
   );
 
+  const handleDropRejected = useCallback(
+    (rejectedFiles: FileRejection[], event: DropEvent) => {
+      rejectedFiles.forEach((file) => {
+        if (file.file.size > 5 * 1024 * 1024) {
+          toast.error(`Could not upload file: ${file.file.name}`, {
+            description: `File size exceeds 5MB limit.`,
+          });
+        } else {
+          toast.error(`Could not upload file: ${file.file.name}`, {
+            description: file.errors.map((error) => error.message).join(", "),
+            closeButton: true,
+          });
+        }
+      });
+    },
+    []
+  );
+
   return (
     <Dropzone
       onDropAccepted={handleFiles}
       multiple={true}
       maxSize={5 * 1024 * 1024}
+      onDropRejected={handleDropRejected}
     >
       {({ getRootProps, getInputProps }) => (
         <div {...getRootProps()} className="flex flex-col items-center gap-2">
