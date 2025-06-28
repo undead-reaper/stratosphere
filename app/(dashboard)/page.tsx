@@ -1,5 +1,6 @@
 import { getFiles } from "@/appwrite/actions/file.actions";
 import { getCurrentUser } from "@/appwrite/actions/user.actions";
+import TypeErrorDistributionChart from "@/components/TypeDistributionChart";
 import {
   Card,
   CardDescription,
@@ -24,6 +25,7 @@ import { getFormattedSize } from "@/lib/utils";
 import { AppwriteFileOutput } from "@/types/AppwriteFile";
 import { format, formatDistanceToNowStrict } from "date-fns";
 import { Models } from "node-appwrite";
+import { Suspense } from "react";
 
 const Home = async () => {
   const files: Models.DocumentList<AppwriteFileOutput> = await getFiles({
@@ -47,10 +49,13 @@ const Home = async () => {
         </CardHeader>
       </Card>
       <p className="text-muted-foreground">Total Storage</p>
-      <h1 className="text-xl font-bold">
+      <h1 className="text-xl font-bold mb-5">
         {totalSize} <span className="text-base font-normal">used from 2GB</span>
       </h1>
-      <h1 className="mb-5 font-playfair-display font-bold mt-5">
+      <Suspense>
+        <TypeErrorDistributionChart files={files} />
+      </Suspense>
+      <h1 className="mb-5 font-playfair-display font-bold mt-10">
         Recently Modified Files
       </h1>
       <Table>
