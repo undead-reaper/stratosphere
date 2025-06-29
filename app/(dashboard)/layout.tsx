@@ -9,9 +9,12 @@ import { ReactNode } from "react";
 const DashboardLayout = async ({
   children,
 }: Readonly<{ children: ReactNode }>) => {
-  const currentUser = await getCurrentUser();
-
-  if (!currentUser) redirect("/login", RedirectType.replace);
+  const currentUser = await getCurrentUser().then((user) => {
+    if (!user) {
+      redirect("/login", RedirectType.replace);
+    }
+    return user;
+  });
 
   return (
     <SidebarProvider className="flex h-screen">

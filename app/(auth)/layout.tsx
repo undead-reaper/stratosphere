@@ -7,11 +7,11 @@ import { ReactNode } from "react";
 export default async function AuthLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
-  const currentUser = await getCurrentUser();
-
-  if (currentUser) {
-    redirect("/", RedirectType.replace);
-  }
+  await getCurrentUser().then((user) => {
+    if (user) {
+      redirect("/", RedirectType.replace);
+    }
+  });
 
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
