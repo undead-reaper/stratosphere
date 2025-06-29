@@ -3,7 +3,7 @@ import AppSidebar from "@/components/AppSidebar";
 import Header from "@/components/Header";
 import MobileNavigation from "@/components/MobileNavigation";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { redirect } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
 import { ReactNode } from "react";
 
 const DashboardLayout = async ({
@@ -11,7 +11,7 @@ const DashboardLayout = async ({
 }: Readonly<{ children: ReactNode }>) => {
   const currentUser = await getCurrentUser();
 
-  if (!currentUser) redirect("/login");
+  if (!currentUser) redirect("/login", RedirectType.replace);
 
   return (
     <SidebarProvider className="flex h-screen">

@@ -53,7 +53,7 @@ const LoginForm = ({ className, ...props }: ComponentProps<"form">) => {
           });
         } else {
           toast.error("Unable to authenticate", {
-            description: "An unexpected error occurred.",
+            description: `${error}`,
           });
         }
       }

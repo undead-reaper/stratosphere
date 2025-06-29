@@ -5,8 +5,8 @@ import { clientEnv } from "@/env";
 import { type AppwriteUserOutput } from "@/types/AppwriteUser";
 import { cookies } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
-import { NextRequest } from "next/server";
-import { AppwriteException, ID, Query } from "node-appwrite";
+import { ID, Query } from "node-appwrite";
+import { toast } from "sonner";
 
 const getUserByEmail = async (
   email: string
@@ -31,12 +31,8 @@ export const sendEmailOTP = async ({
   try {
     const session = await account.createEmailToken(ID.unique(), email);
     return session.userId;
-  } catch (error: unknown) {
-    if (error instanceof AppwriteException) {
-      throw error;
-    } else {
-      throw new Error("Failed to send email OTP");
-    }
+  } catch (error) {
+    throw error;
   }
 };
 
@@ -81,15 +77,14 @@ export const loginWithEmail = async ({
 }): Promise<string> => {
   try {
     const existingUser = await getUserByEmail(email);
-    if (!existingUser) throw new Error("User not found");
-    await sendEmailOTP({ email });
-    return existingUser.accountId;
-  } catch (error) {
-    if (error instanceof AppwriteException) {
-      throw error;
-    } else {
-      throw new Error("Failed to login with email");
+
+    if (existingUser) {
+      await sendEmailOTP({ email });
+      return existingUser.accountId;
     }
+    throw new Error("User not found.");
+  } catch (error) {
+    throw error;
   }
 };
 
@@ -116,28 +111,29 @@ export const verifyEmailOTP = async ({
 
     return session.$id;
   } catch (error) {
-    if (error instanceof AppwriteException) {
-      throw error;
-    } else {
-      throw new Error("Failed to verify email OTP");
-    }
+    throw error;
   }
 };
 
 export const getCurrentUser = async (): Promise<AppwriteUserOutput | null> => {
-  const { databases, account } = await createSessionClient();
+  try {
+    const { databases, account } = await createSessionClient();
 
-  const result = await account.get();
+    const result = await account.get();
 
-  const user = await databases.listDocuments<AppwriteUserOutput>(
-    clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
-    clientEnv.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID,
-    [Query.equal("accountId", result.$id)]
-  );
+    const user = await databases.listDocuments<AppwriteUserOutput>(
+      clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
+      clientEnv.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID,
+      [Query.equal("accountId", result.$id)]
+    );
 
-  if (user.total <= 0) return null;
+    if (user.total <= 0) return null;
 
-  return user.documents[0];
+    return user.documents[0];
+  } catch (error) {
+    console.log("Error fetching current user:", error);
+    return null;
+  }
 };
 
 export const signOutUser = async (): Promise<void> => {
@@ -146,35 +142,12 @@ export const signOutUser = async (): Promise<void> => {
   try {
     await account.deleteSession("current");
     (await cookies()).delete("appwrite_session");
+    toast.success("Successfully signed out", {
+      description: "Redirecting to login",
+    });
   } catch (error) {
-    if (error instanceof AppwriteException) {
-      throw error;
-    } else {
-      throw new Error("Failed to sign out user");
-    }
+    throw error;
   } finally {
     redirect("/login", RedirectType.replace);
-  }
-};
-
-export const getAuthStatus = async ({
-  req,
-}: {
-  req: NextRequest;
-}): Promise<boolean> => {
-  const isAuthenticated = req.cookies.get("appwrite_session") !== undefined;
-  if (!isAuthenticated) return false;
-  try {
-    const { account } = await createSessionClient();
-    const user = await account.get();
-    return Boolean(user);
-  } catch (error) {
-    if (error instanceof AppwriteException) {
-      console.error("Authentication error:", error.message);
-      throw error;
-    } else {
-      console.error("Unexpected error:", error);
-      throw new Error("An unexpected error occurred.");
-    }
   }
 };

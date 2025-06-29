@@ -11,7 +11,7 @@ import {
 } from "@/types/AppwriteFile";
 import { AppwriteUserOutput } from "@/types/AppwriteUser";
 import { revalidatePath } from "next/cache";
-import { AppwriteException, ID, Models, Query } from "node-appwrite";
+import { ID, Models, Query } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 
 type UploadFileProps = {
@@ -64,17 +64,13 @@ export const uploadFile = async ({
           clientEnv.NEXT_PUBLIC_APPWRITE_BUCKET_ID,
           bucketFile.$id
         );
-        throw new Error(`Failed to create file document: ${error.message}`);
+        throw error;
       });
 
     revalidatePath(path);
     return newFile;
   } catch (error) {
-    if (error instanceof AppwriteException) {
-      throw error;
-    } else {
-      throw new Error(`Failed to upload file: ${error}`);
-    }
+    throw error;
   }
 };
 
@@ -133,11 +129,7 @@ export const getFiles = async ({
     );
     return files;
   } catch (error) {
-    if (error instanceof AppwriteException) {
-      throw error;
-    } else {
-      throw new Error(`Failed to get files: ${error}`);
-    }
+    throw error;
   }
 };
 
@@ -168,11 +160,7 @@ export const renameFile = async ({
     revalidatePath(path);
     return updatedFile;
   } catch (error) {
-    if (error instanceof AppwriteException) {
-      throw error;
-    } else {
-      throw new Error(`Failed to rename file: ${error}`);
-    }
+    throw error;
   }
 };
 
@@ -206,11 +194,7 @@ export const shareFile = async ({
     revalidatePath(path);
     return updatedFile;
   } catch (error) {
-    if (error instanceof AppwriteException) {
-      throw error;
-    } else {
-      throw new Error(`Failed to share file: ${error}`);
-    }
+    throw error;
   }
 };
 
@@ -240,11 +224,7 @@ export const removeShare = async ({
     revalidatePath(path);
     return updatedFile;
   } catch (error) {
-    if (error instanceof AppwriteException) {
-      throw error;
-    } else {
-      throw new Error(`Failed to remove share from file: ${error}`);
-    }
+    throw error;
   }
 };
 
@@ -278,10 +258,6 @@ export const deleteFile = async ({
     revalidatePath(path);
     return true;
   } catch (error) {
-    if (error instanceof AppwriteException) {
-      throw error;
-    } else {
-      throw new Error(`Failed to remove share from file: ${error}`);
-    }
+    throw error;
   }
 };
