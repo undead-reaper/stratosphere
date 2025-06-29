@@ -32,7 +32,7 @@ export const sendEmailOTP = async ({
     const session = await account.createEmailToken(ID.unique(), email);
     return session.userId;
   } catch (error) {
-    throw error;
+    throw new Error(`${error}`);
   }
 };
 
@@ -84,7 +84,7 @@ export const loginWithEmail = async ({
     }
     throw new Error("User not found.");
   } catch (error) {
-    throw error;
+    throw new Error(`${error}`);
   }
 };
 
@@ -111,7 +111,7 @@ export const verifyEmailOTP = async ({
 
     return session.$id;
   } catch (error) {
-    throw error;
+    throw new Error(`${error}`);
   }
 };
 
@@ -146,7 +146,7 @@ export const signOutUser = async (): Promise<void> => {
       description: "Redirecting to login",
     });
   } catch (error) {
-    throw error;
+    throw new Error(`${error}`);
   } finally {
     redirect("/login", RedirectType.replace);
   }

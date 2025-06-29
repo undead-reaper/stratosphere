@@ -64,13 +64,13 @@ export const uploadFile = async ({
           clientEnv.NEXT_PUBLIC_APPWRITE_BUCKET_ID,
           bucketFile.$id
         );
-        throw error;
+        throw new Error(error);
       });
 
     revalidatePath(path);
     return newFile;
   } catch (error) {
-    throw error;
+    throw new Error(`${error}`);
   }
 };
 
@@ -129,7 +129,7 @@ export const getFiles = async ({
     );
     return files;
   } catch (error) {
-    throw error;
+    throw new Error(`${error}`);
   }
 };
 
@@ -160,7 +160,7 @@ export const renameFile = async ({
     revalidatePath(path);
     return updatedFile;
   } catch (error) {
-    throw error;
+    throw new Error(`${error}`);
   }
 };
 
@@ -194,7 +194,7 @@ export const shareFile = async ({
     revalidatePath(path);
     return updatedFile;
   } catch (error) {
-    throw error;
+    throw new Error(`${error}`);
   }
 };
 
@@ -224,7 +224,7 @@ export const removeShare = async ({
     revalidatePath(path);
     return updatedFile;
   } catch (error) {
-    throw error;
+    throw new Error(`${error}`);
   }
 };
 
@@ -258,6 +258,6 @@ export const deleteFile = async ({
     revalidatePath(path);
     return true;
   } catch (error) {
-    throw error;
+    throw new Error(`${error}`);
   }
 };
