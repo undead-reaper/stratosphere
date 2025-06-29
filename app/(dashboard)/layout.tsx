@@ -6,6 +6,8 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { redirect, RedirectType } from "next/navigation";
 import { ReactNode } from "react";
 
+export const dynamic = "force-dynamic";
+
 const DashboardLayout = async ({
   children,
 }: Readonly<{ children: ReactNode }>) => {

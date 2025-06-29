@@ -4,6 +4,8 @@ import Image from "next/image";
 import { redirect, RedirectType } from "next/navigation";
 import { ReactNode } from "react";
 
+export const dynamic = "force-dynamic";
+
 export default async function AuthLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
