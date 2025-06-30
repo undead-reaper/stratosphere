@@ -55,41 +55,46 @@ const Home = async () => {
       <Suspense>
         <TypeErrorDistributionChart files={result.data!} />
       </Suspense>
-      <h1 className="mb-5 font-playfair-display font-bold mt-10">
-        Recently Modified Files
-      </h1>
-      <Table>
-        <TableCaption>Your Recently Modified Files</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-min">File Name</TableHead>
-            <TableHead>Date Uploaded</TableHead>
-            <TableHead>Modified</TableHead>
-            <TableHead>File Size</TableHead>
-            <TableHead>File Owner</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {recentFiles!.map((file) => (
-            <TableRow key={file.$id}>
-              <TableCell>{file.name}</TableCell>
-              <TableCell>{format(file.$createdAt, "dd/MM/yyyy")}</TableCell>
-              <TableCell>
-                {formatDistanceToNowStrict(file.$updatedAt)} ago
-              </TableCell>
-              <TableCell>{getFormattedSize({ size: file.size })}</TableCell>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TableCell>{file.owner.fullName}</TableCell>
-                </TooltipTrigger>
-                <TooltipContent side="left">
-                  <p>{file.owner.email}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+
+      {recentFiles.length > 0 && (
+        <>
+          <h1 className="mb-5 font-playfair-display font-bold mt-10">
+            Recently Modified Files
+          </h1>
+          <Table>
+            <TableCaption>Your Recently Modified Files</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-min">File Name</TableHead>
+                <TableHead>Date Uploaded</TableHead>
+                <TableHead>Modified</TableHead>
+                <TableHead>File Size</TableHead>
+                <TableHead>File Owner</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {recentFiles!.map((file) => (
+                <TableRow key={file.$id}>
+                  <TableCell>{file.name}</TableCell>
+                  <TableCell>{format(file.$createdAt, "dd/MM/yyyy")}</TableCell>
+                  <TableCell>
+                    {formatDistanceToNowStrict(file.$updatedAt)} ago
+                  </TableCell>
+                  <TableCell>{getFormattedSize({ size: file.size })}</TableCell>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <TableCell>{file.owner.fullName}</TableCell>
+                    </TooltipTrigger>
+                    <TooltipContent side="left">
+                      <p>{file.owner.email}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </>
+      )}
     </div>
   );
 };
