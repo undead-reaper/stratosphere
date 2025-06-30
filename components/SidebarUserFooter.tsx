@@ -110,18 +110,18 @@ const SidebarUserFooter = ({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem disabled={isPending}>
+              <DropdownMenuItem disabled={true}>
                 <Sparkles />
                 Upgrade to Pro
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem disabled={isPending}>
+              <DropdownMenuItem disabled={true}>
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem disabled={isPending}>
+              <DropdownMenuItem disabled={true}>
                 <CreditCard />
                 Billing
               </DropdownMenuItem>
