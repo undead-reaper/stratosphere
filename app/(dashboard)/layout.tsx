@@ -23,7 +23,7 @@ const DashboardLayout = async ({
       <section className="flex h-full w-full flex-1 flex-col">
         <MobileNavigation
           userId={result.data.$id}
-          accountId={result.data.documents}
+          accountId={result.data.accountId}
         />
         <Header userId={result.data.$id} accountId={result.data.accountId} />
         <div className="w-full max-w-full h-full">{children}</div>
