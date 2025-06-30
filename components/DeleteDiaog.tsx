@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AppwriteFileOutput } from "@/types/AppwriteFile";
 import { usePathname } from "next/navigation";
-import { AppwriteException } from "node-appwrite";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
@@ -31,25 +30,20 @@ const DeleteDialog = ({
 
   const handleDelete = async () => {
     startTransition(async () => {
-      try {
-        await deleteFile({
-          fileId: file.$id,
-          bucketField: file.bucketField,
-          path,
+      const result = await deleteFile({
+        fileId: file.$id,
+        bucketField: file.bucketField,
+        path,
+      });
+
+      if (result.error) {
+        toast.error("Failed to delete file", {
+          description: result.error,
         });
+      } else {
         toast.success("File deleted successfully", {
           description: "The file has been removed from your library.",
         });
-      } catch (error) {
-        if (error instanceof AppwriteException) {
-          toast.error("Failed to delete file", {
-            description: error.message,
-          });
-        } else {
-          toast.error("Failed to delete file", {
-            description: "Please try again later.",
-          });
-        }
       }
     });
   };

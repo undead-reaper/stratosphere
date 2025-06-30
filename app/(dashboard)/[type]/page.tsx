@@ -2,8 +2,7 @@ import { getFiles } from "@/appwrite/actions/file.actions";
 import FileCard from "@/components/FileCard";
 import Sort from "@/components/Sort";
 import { getFileTypeParams, getFormattedSize } from "@/lib/utils";
-import { AppwriteFileOutput, type FileType } from "@/types/AppwriteFile";
-import { Models } from "node-appwrite";
+import { type FileType } from "@/types/AppwriteFile";
 
 const Page = async ({
   params,
@@ -17,7 +16,7 @@ const Page = async ({
 
   const types: FileType[] = getFileTypeParams(type);
 
-  const files: Models.DocumentList<AppwriteFileOutput> = await getFiles({
+  const result = await getFiles({
     types,
     query: query as string,
     sort: sort as string,
@@ -34,7 +33,10 @@ const Page = async ({
             Total Size:{" "}
             <span>
               {getFormattedSize({
-                size: files.documents.reduce((acc, file) => acc + file.size, 0),
+                size: result.data!.documents.reduce(
+                  (acc, file) => acc + file.size,
+                  0
+                ),
               })}
             </span>
           </p>
@@ -46,9 +48,9 @@ const Page = async ({
           Sort by: <Sort />
         </span>
       </header>
-      {files.total > 0 ? (
+      {result.data!.total > 0 ? (
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 my-5">
-          {files.documents.map((file) => (
+          {result.data!.documents.map((file) => (
             <FileCard key={file.$id} file={file} />
           ))}
         </div>

@@ -12,7 +12,7 @@ import { AppwriteFileOutput } from "@/types/AppwriteFile";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AppwriteException, Models } from "node-appwrite";
+import { Models } from "node-appwrite";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
@@ -36,22 +36,17 @@ const SearchDialog = ({
     const searchFiles = async () => {
       setIsLoading(true);
       setResults(null);
-      try {
-        const response = await getFiles({ query: debouncedQuery!, types: [] });
-        setResults(response);
-      } catch (error) {
-        if (error instanceof AppwriteException) {
-          toast.error("Failed to initialize search", {
-            description: error.message,
-          });
-        } else {
-          toast.error("Failed to initialize search", {
-            description: "An unexpected error occurred.",
-          });
-        }
-      } finally {
-        setIsLoading(false);
+      const result = await getFiles({ query: debouncedQuery!, types: [] });
+
+      if (result.error || !result.data) {
+        toast.error("Failed to fetch files", {
+          description: result.error,
+        });
+      } else {
+        setResults(result.data);
       }
+
+      setIsLoading(false);
     };
     if (debouncedQuery) {
       searchFiles();

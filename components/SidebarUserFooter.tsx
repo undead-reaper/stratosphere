@@ -22,7 +22,6 @@ import {
   LogOut,
   Sparkles,
 } from "lucide-react";
-import { AppwriteException } from "node-appwrite";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
@@ -46,14 +45,15 @@ const SidebarUserFooter = ({
 
   const handleSignOut = async () => {
     startTransition(async () => {
-      try {
-        await signOutUser();
-      } catch (error) {
-        if (error instanceof AppwriteException) {
-          toast.error("Failed to Sign Out", {
-            description: error.message,
-          });
-        }
+      const result = await signOutUser();
+      if (result.error) {
+        toast.error("Failed to Sign Out", {
+          description: result.error,
+        });
+      } else {
+        toast.success("Signed Out Successfully", {
+          description: "You have been signed out.",
+        });
       }
     });
   };

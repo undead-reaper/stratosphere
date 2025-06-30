@@ -28,23 +28,23 @@ import { Models } from "node-appwrite";
 import { Suspense } from "react";
 
 const Home = async () => {
-  const files: Models.DocumentList<AppwriteFileOutput> = await getFiles({
-    types: [],
-  });
+  const result: FunctionReturn<Models.DocumentList<AppwriteFileOutput>> =
+    await getFiles({ types: [] });
 
-  const size = files?.documents.reduce((acc, file) => acc + file.size, 0) || 0;
-  const user = await getCurrentUser();
+  const size =
+    result.data!.documents.reduce((acc, file) => acc + file.size, 0) || 0;
+  const userResult = await getCurrentUser();
 
   const totalSize = getFormattedSize({ size });
   const now: Date = new Date();
   const date = format(now, "EEEE, MMMM d, yyyy");
-  const recentFiles = files.documents.slice(0, 5);
+  const recentFiles = result.data!.documents.slice(0, 5);
 
   return (
     <div className="p-5 flex flex-col w-full h-full">
       <Card className="mb-5">
         <CardHeader>
-          <CardTitle>👋 Hello, {user?.fullName}!</CardTitle>
+          <CardTitle>👋 Hello, {userResult.data!.fullName}!</CardTitle>
           <CardDescription>{date}</CardDescription>
         </CardHeader>
       </Card>
@@ -53,7 +53,7 @@ const Home = async () => {
         {totalSize} <span className="text-base font-normal">used from 2GB</span>
       </h1>
       <Suspense>
-        <TypeErrorDistributionChart files={files} />
+        <TypeErrorDistributionChart files={result.data!} />
       </Suspense>
       <h1 className="mb-5 font-playfair-display font-bold mt-10">
         Recently Modified Files
@@ -70,7 +70,7 @@ const Home = async () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {recentFiles.map((file) => (
+          {recentFiles!.map((file) => (
             <TableRow key={file.$id}>
               <TableCell>{file.name}</TableCell>
               <TableCell>{format(file.$createdAt, "dd/MM/yyyy")}</TableCell>

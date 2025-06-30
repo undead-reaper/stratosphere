@@ -11,22 +11,21 @@ export const dynamic = "force-dynamic";
 const DashboardLayout = async ({
   children,
 }: Readonly<{ children: ReactNode }>) => {
-  const currentUser = await getCurrentUser().then((user) => {
-    if (!user) {
-      redirect("/login", RedirectType.replace);
-    }
-    return user;
-  });
+  const result = await getCurrentUser();
+
+  if (result.error || !result.data) {
+    redirect("/login", RedirectType.replace);
+  }
 
   return (
     <SidebarProvider className="flex h-screen">
-      <AppSidebar {...currentUser} />
+      <AppSidebar {...result.data} />
       <section className="flex h-full w-full flex-1 flex-col">
         <MobileNavigation
-          userId={currentUser.$id}
-          accountId={currentUser.documents}
+          userId={result.data.$id}
+          accountId={result.data.documents}
         />
-        <Header userId={currentUser.$id} accountId={currentUser.accountId} />
+        <Header userId={result.data.$id} accountId={result.data.accountId} />
         <div className="w-full max-w-full h-full">{children}</div>
       </section>
     </SidebarProvider>

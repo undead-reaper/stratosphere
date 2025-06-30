@@ -16,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { AppwriteFileOutput } from "@/types/AppwriteFile";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePathname } from "next/navigation";
-import { AppwriteException } from "node-appwrite";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -59,25 +58,22 @@ const RenameDialog = ({
         ? values.newName
         : `${values.newName}.${file.extension}`;
 
-      try {
-        await renameFile({
-          fileId: file.$id,
-          name: finalName,
-          path: path,
-          extension: newExtension,
+      const result = await renameFile({
+        fileId: file.$id,
+        name: finalName,
+        path: path,
+        extension: newExtension,
+      });
+
+      if (result.error) {
+        toast.error("Error renaming file", {
+          description: result.error,
         });
+      } else {
         toast.success("File renamed successfully", {
           description: `File has been renamed to ${finalName}`,
         });
         onOpenChange(false);
-      } catch (error) {
-        if (error instanceof AppwriteException) {
-          toast.error("Error renaming file", { description: error.message });
-        } else {
-          toast.error("Error renaming file", {
-            description: "An unknown error occurred",
-          });
-        }
       }
     });
   };

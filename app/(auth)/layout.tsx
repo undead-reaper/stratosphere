@@ -9,11 +9,12 @@ export const dynamic = "force-dynamic";
 export default async function AuthLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
-  await getCurrentUser().then((user) => {
-    if (user) {
-      redirect("/", RedirectType.replace);
-    }
-  });
+
+  const result = await getCurrentUser();
+
+  if (result.data) {
+    redirect("/", RedirectType.replace);
+  }
 
   return (
     <div className="grid min-h-svh lg:grid-cols-2">

@@ -4,7 +4,6 @@ import { uploadFile } from "@/appwrite/actions/file.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { usePathname } from "next/navigation";
-import { AppwriteException } from "node-appwrite";
 import { useCallback } from "react";
 import Dropzone, { FileRejection } from "react-dropzone";
 import { toast } from "sonner";
@@ -20,16 +19,13 @@ const UploadButton = ({ ownerId, accountId }: UploadFileProps) => {
   const handleFiles = useCallback(
     (acceptedFiles: File[]) => {
       const handleUploadFile = (file: File) => {
-        return new Promise((resolve, reject) => {
-          try {
-            const uploadedFile = uploadFile({ file, ownerId, accountId, path });
-            resolve(uploadedFile);
-          } catch (error) {
-            if (error instanceof AppwriteException) {
-              reject(error.message);
-            } else {
-              reject(`Failed to upload file: ${error}`);
-            }
+        return new Promise(async (resolve, reject) => {
+          const result = await uploadFile({ file, ownerId, accountId, path });
+
+          if (result.error) {
+            return reject(result.error);
+          } else {
+            resolve(result);
           }
         });
       };

@@ -15,7 +15,6 @@ import VerificationDialog from "@/components/VerificationDialog";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { AppwriteException } from "node-appwrite";
 import { ComponentProps, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -43,19 +42,13 @@ const LoginForm = ({ className, ...props }: ComponentProps<"form">) => {
 
   const onSubmit = (values: LoginFormValues) => {
     startTransition(async () => {
-      try {
-        const accountId = await loginWithEmail({ email: values.email });
-        setAccountId(accountId);
-      } catch (error) {
-        if (error instanceof AppwriteException) {
-          toast.error("Unable to authenticate", {
-            description: error.message,
-          });
-        } else {
-          toast.error("Unable to authenticate", {
-            description: `${error}`,
-          });
-        }
+      const result = await loginWithEmail({ email: values.email });
+      if (result.error) {
+        toast.error("Unable to authenticate", {
+          description: result.error,
+        });
+      } else {
+        setAccountId(result.data!);
       }
     });
   };

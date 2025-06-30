@@ -30,7 +30,6 @@ import { AppwriteFileOutput } from "@/types/AppwriteFile";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { AppwriteException } from "node-appwrite";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -67,42 +66,51 @@ const ShareDialog = ({
   });
 
   const onSubmit = (values: ShareDialogType) => {
-    if (file.users.includes(values.email) || file.owner.email === values.email)
+    if (
+      file.users.includes(values.email) ||
+      file.owner.email === values.email
+    ) {
+      toast.error("User already has access to this file", {
+        description: "You cannot share the file with the same user again.",
+      });
       return;
-    startTransition(() => {
-      try {
-        shareFile({ fileId: file.$id, email: values.email, path });
-        shareDialogForm.reset();
+    }
+    startTransition(async () => {
+      const result = await shareFile({
+        fileId: file.$id,
+        email: values.email,
+        path,
+      });
+
+      if (result.error) {
+        toast.error("Error sharing file", {
+          description: result.error,
+        });
+      } else {
         toast.success("File shared successfully", {
           description: "The file has been shared with " + values.email,
         });
-      } catch (error) {
-        if (error instanceof AppwriteException) {
-          toast.error("Error sharing file", { description: error.message });
-        } else {
-          toast.error("Error sharing file", {
-            description: "Something went wrong",
-          });
-        }
+        shareDialogForm.reset();
       }
     });
   };
 
   const revokeShare = (userEmail: string) => {
-    startTransition(() => {
-      try {
-        removeShare({ fileId: file.$id, email: userEmail, path });
-        toast.success("File access revoked successfully", {
-          description: "It is no longer accessible to" + userEmail,
+    startTransition(async () => {
+      const result = await removeShare({
+        fileId: file.$id,
+        email: userEmail,
+        path,
+      });
+
+      if (result.error) {
+        toast.error("Error removing share", {
+          description: result.error,
         });
-      } catch (error) {
-        if (error instanceof AppwriteException) {
-          toast.error("Error removing share", { description: error.message });
-        } else {
-          toast.error("Error removing share", {
-            description: "Something went wrong",
-          });
-        }
+      } else {
+        toast.success("File access revoked successfully", {
+          description: "It is no longer accessible to " + userEmail,
+        });
       }
     });
   };

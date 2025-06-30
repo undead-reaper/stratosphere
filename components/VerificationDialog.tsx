@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/input-otp";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { AppwriteException } from "node-appwrite";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -54,29 +53,33 @@ const VerificationDialog = ({ email, accountId }: VerificationDialogProps) => {
 
   const onSubmit = async (values: VerificationFormValues) => {
     startTransition(async () => {
-      try {
-        const sessionId = await verifyEmailOTP({
-          accountId,
-          secret: values.otp,
+      const result = await verifyEmailOTP({ accountId, secret: values.otp });
+      console.log("OTP Verification Result:", result);
+      if (result.error) {
+        toast.error("Failed to Verify OTP", {
+          description: result.error,
         });
-        if (sessionId) route.replace("/");
-      } catch (error) {
-        if (error instanceof AppwriteException) {
-          toast.error("Failed to Verify OTP", {
-            description: error.message,
-          });
-        } else {
-          toast.error("Failed to Verify OTP", {
-            description: "An unexpected error occurred.",
-          });
-        }
+      } else {
+        toast.success("OTP Verified Successfully", {
+          description: "Redirecting to dashboard shortly.",
+        });
+        route.replace("/");
       }
     });
   };
 
   const handleResendOTP = () => {
     startTransition(async () => {
-      await sendEmailOTP({ email });
+      const result = await sendEmailOTP({ email });
+      if (result.error) {
+        toast.error("Failed to Resend OTP", {
+          description: result.error,
+        });
+      } else {
+        toast.success("OTP Resent Successfully", {
+          description: "Please check your email for the new OTP.",
+        });
+      }
     });
   };
 

@@ -15,7 +15,6 @@ import VerificationDialog from "@/components/VerificationDialog";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { AppwriteException } from "node-appwrite";
 import { ComponentProps, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -45,22 +44,19 @@ const SignupForm = ({ className, ...props }: ComponentProps<"form">) => {
 
   const onSubmit = (values: SignupFormValues) => {
     startTransition(async () => {
-      try {
-        const accountId = await createAccount({
-          fullName: values.fullName,
-          email: values.email,
+      const result = await createAccount({
+        email: values.email,
+        fullName: values.fullName,
+      });
+      if (result.error) {
+        toast.error("Unable to create account", {
+          description: result.error,
         });
-        setAccountId(accountId);
-      } catch (error) {
-        if (error instanceof AppwriteException) {
-          toast.error("Unable to create account", {
-            description: error.message,
-          });
-        } else {
-          toast.error("Unable to create account", {
-            description: "An unexpected error occurred.",
-          });
-        }
+      } else {
+        toast.success(
+          "Account created successfully! Please verify your email."
+        );
+        setAccountId(result.data!);
       }
     });
   };
@@ -141,7 +137,7 @@ const SignupForm = ({ className, ...props }: ComponentProps<"form">) => {
       {accountId && (
         <VerificationDialog
           email={signupForm.getValues("email")}
-          accountId={accountId ?? ""}
+          accountId={accountId}
         />
       )}
     </>
