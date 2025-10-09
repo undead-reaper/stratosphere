@@ -20,7 +20,6 @@ const FileCard = ({ file }: { file: AppwriteFileOutput }) => {
           <Image
             src={constructUrl({
               bucketField: file.bucketField,
-              variant: "preview",
             })}
             width={0}
             height={0}

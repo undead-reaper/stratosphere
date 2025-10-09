@@ -46,7 +46,7 @@ export const uploadFile = async ({
     const fileDocument: Partial<AppwriteFileInput> = {
       type,
       name: bucketFile.name,
-      url: constructUrl({ bucketField: bucketFile.$id, variant: "file" }),
+      url: constructUrl({ bucketField: bucketFile.$id }),
       extension,
       size: bucketFile.sizeOriginal,
       owner: ownerId,

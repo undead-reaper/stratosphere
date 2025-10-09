@@ -75,9 +75,13 @@ export const constructUrl = ({
   variant,
 }: {
   bucketField: string;
-  variant: UrlVariant;
+  variant?: UrlVariant;
 }) => {
-  return `${clientEnv.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${clientEnv.NEXT_PUBLIC_APPWRITE_BUCKET_ID}/files/${bucketField}/${variant}?project=${clientEnv.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`;
+  return `${clientEnv.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${
+    clientEnv.NEXT_PUBLIC_APPWRITE_BUCKET_ID
+  }/files/${bucketField}/${variant || "view"}?project=${
+    clientEnv.NEXT_PUBLIC_APPWRITE_PROJECT_ID
+  }`;
 };
 
 export const getFileTypeParams = (type: string): FileType[] => {

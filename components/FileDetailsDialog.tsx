@@ -28,7 +28,6 @@ const FileDetailsDialog = ({
               <Image
                 src={constructUrl({
                   bucketField: file.bucketField,
-                  variant: "preview",
                 })}
                 width={0}
                 height={0}
