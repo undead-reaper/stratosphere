@@ -1,11 +1,13 @@
 import type { NextConfig } from "next";
 
-
 const nextConfig: NextConfig = {
   /* config options here */
+  reactCompiler: true,
+  typedRoutes: true,
+  cacheComponents: true,
   experimental: {
-    reactCompiler: true,
-    nodeMiddleware: true,
+    useLightningcss: true,
+    typedEnv: true,
     serverActions: {
       bodySizeLimit: "50mb",
     },

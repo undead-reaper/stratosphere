@@ -2,6 +2,7 @@ import { clientEnv } from "@/env";
 import { type FileType } from "@/types/AppwriteFile";
 import { clsx, type ClassValue } from "clsx";
 import { format } from "date-fns/format";
+import { Route } from "next";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -76,12 +77,12 @@ export const constructUrl = ({
 }: {
   bucketField: string;
   variant?: UrlVariant;
-}) => {
+}): Route => {
   return `${clientEnv.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${
     clientEnv.NEXT_PUBLIC_APPWRITE_BUCKET_ID
   }/files/${bucketField}/${variant || "view"}?project=${
     clientEnv.NEXT_PUBLIC_APPWRITE_PROJECT_ID
-  }`;
+  }` as Route;
 };
 
 export const getFileTypeParams = (type: string): FileType[] => {

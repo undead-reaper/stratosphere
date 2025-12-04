@@ -6,6 +6,7 @@ import { AppwriteUserOutput } from "@/types/AppwriteUser";
 import { cookies } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
 import { AppwriteException, ID, Query } from "node-appwrite";
+import { cache } from "react";
 
 const getUserByEmail = async ({
   email,
@@ -151,37 +152,37 @@ export const verifyEmailOTP = async ({
   }
 };
 
-export const getCurrentUser = async (): Promise<
-  FunctionReturn<AppwriteUserOutput>
-> => {
-  try {
-    const clientResult = await createSessionClient();
-    if (clientResult.error || !clientResult.data) {
-      return { error: clientResult.error };
-    }
+export const getCurrentUser = cache(
+  async (): Promise<FunctionReturn<AppwriteUserOutput>> => {
+    try {
+      const clientResult = await createSessionClient();
+      if (clientResult.error || !clientResult.data) {
+        return { error: clientResult.error };
+      }
 
-    const { databases, account } = clientResult.data;
+      const { databases, account } = clientResult.data;
 
-    const result = await account.get();
-    const user = await databases.listDocuments<AppwriteUserOutput>(
-      clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
-      clientEnv.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID,
-      [Query.equal("accountId", [result.$id])]
-    );
+      const result = await account.get();
+      const user = await databases.listDocuments<AppwriteUserOutput>(
+        clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
+        clientEnv.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID,
+        [Query.equal("accountId", [result.$id])]
+      );
 
-    if (user.total === 0) {
-      return { error: "User not found." };
-    } else {
-      return { data: user.documents[0] };
-    }
-  } catch (error) {
-    if (error instanceof AppwriteException) {
-      return { error: error.message };
-    } else {
-      return { error: error as string };
+      if (user.total === 0) {
+        return { error: "User not found." };
+      } else {
+        return { data: user.documents[0] };
+      }
+    } catch (error) {
+      if (error instanceof AppwriteException) {
+        return { error: error.message };
+      } else {
+        return { error: error as string };
+      }
     }
   }
-};
+);
 
 export const signOutUser = async (): Promise<FunctionReturn<void>> => {
   const clientResult = await createSessionClient();

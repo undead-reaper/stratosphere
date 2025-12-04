@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import { NavItems } from "@/constants";
 import { Earth } from "lucide-react";
+import { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -40,7 +41,7 @@ const AppSidebar = ({ ...props }: AppSidebarProps) => {
             return (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton isActive={isActive} asChild>
-                  <Link href={item.href}>
+                  <Link href={item.href as Route}>
                     <item.icon />
                     <span>{item.name}</span>
                   </Link>

@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { sortTypes } from "@/constants";
+import { Route } from "next";
 import { usePathname, useRouter } from "next/navigation";
 
 const Sort = () => {
@@ -15,7 +16,7 @@ const Sort = () => {
   const path = usePathname();
 
   const handleSort = (value: string) => {
-    router.push(`${path}?sort=${value}`);
+    router.push(`${path}?sort=${value}` as Route);
   };
 
   return (

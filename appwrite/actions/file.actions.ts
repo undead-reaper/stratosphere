@@ -1,5 +1,6 @@
 "use server";
 
+import { getCurrentUser } from "@/appwrite/actions/user.actions";
 import { createAdminClient } from "@/appwrite/client";
 import { clientEnv } from "@/env";
 import { constructUrl, getFileType } from "@/lib/utils";
@@ -12,7 +13,7 @@ import { AppwriteUserOutput } from "@/types/AppwriteUser";
 import { revalidatePath } from "next/cache";
 import { AppwriteException, ID, Models, Query } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
-import { getCurrentUser } from "./user.actions";
+import { cache } from "react";
 
 type UploadFileProps = {
   file: File;
@@ -43,7 +44,7 @@ export const uploadFile = async ({
       getFileType(file.name)
     )[0] as string;
 
-    const fileDocument: Partial<AppwriteFileInput> = {
+    const fileDocument: Omit<AppwriteFileInput, keyof Models.Document> = {
       type,
       name: bucketFile.name,
       url: constructUrl({ bucketField: bucketFile.$id }),
@@ -125,38 +126,40 @@ type GetFilesProps = {
   sort?: string;
 };
 
-export const getFiles = async ({
-  types,
-  query = "",
-  sort = "$createdAt-desc",
-}: GetFilesProps): Promise<
-  FunctionReturn<Models.DocumentList<AppwriteFileOutput>>
-> => {
-  const { databases } = await createAdminClient();
+export const getFiles = cache(
+  async ({
+    types,
+    query = "",
+    sort = "$createdAt-desc",
+  }: GetFilesProps): Promise<
+    FunctionReturn<Models.DocumentList<AppwriteFileOutput>>
+  > => {
+    const { databases } = await createAdminClient();
 
-  try {
-    const { data: currentUser, error: userError } = await getCurrentUser();
-    if (userError || !currentUser) {
-      return { error: userError };
-    }
+    try {
+      const { data: currentUser, error: userError } = await getCurrentUser();
+      if (userError || !currentUser) {
+        return { error: userError };
+      }
 
-    const queries = createQueries({ currentUser, types, query, sort });
+      const queries = createQueries({ currentUser, types, query, sort });
 
-    const files = await databases.listDocuments<AppwriteFileOutput>(
-      clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
-      clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
-      queries
-    );
+      const files = await databases.listDocuments<AppwriteFileOutput>(
+        clientEnv.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
+        clientEnv.NEXT_PUBLIC_APPWRITE_FILES_COLLECTION_ID,
+        queries
+      );
 
-    return { data: files };
-  } catch (error) {
-    if (error instanceof AppwriteException) {
-      return { error: error.message };
-    } else {
-      return { error: error as string };
+      return { data: files };
+    } catch (error) {
+      if (error instanceof AppwriteException) {
+        return { error: error.message };
+      } else {
+        return { error: error as string };
+      }
     }
   }
-};
+);
 
 type RenameFileProps = {
   fileId: string;

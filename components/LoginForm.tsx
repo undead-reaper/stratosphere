@@ -15,7 +15,7 @@ import VerificationDialog from "@/components/VerificationDialog";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { ComponentProps, useState, useTransition } from "react";
+import { ComponentProps, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod/v4";
@@ -30,7 +30,6 @@ const loginFormSchema = z.object({
 type LoginFormValues = z.infer<typeof loginFormSchema>;
 
 const LoginForm = ({ className, ...props }: ComponentProps<"form">) => {
-  const [isPending, startTransition] = useTransition();
   const [accountId, setAccountId] = useState<string | null>(null);
 
   const loginForm = useForm<LoginFormValues>({
@@ -39,18 +38,18 @@ const LoginForm = ({ className, ...props }: ComponentProps<"form">) => {
       email: "",
     },
   });
+  const isPending =
+    loginForm.formState.isSubmitting || loginForm.formState.isValidating;
 
-  const onSubmit = (values: LoginFormValues) => {
-    startTransition(async () => {
-      const result = await loginWithEmail({ email: values.email });
-      if (result.error) {
-        toast.error("Unable to authenticate", {
-          description: result.error,
-        });
-      } else {
-        setAccountId(result.data!);
-      }
-    });
+  const onSubmit = async (values: LoginFormValues) => {
+    const result = await loginWithEmail({ email: values.email });
+    if (result.error) {
+      toast.error("Unable to authenticate", {
+        description: result.error,
+      });
+    } else {
+      setAccountId(result.data!);
+    }
   };
 
   return (
