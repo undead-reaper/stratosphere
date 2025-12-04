@@ -15,16 +15,13 @@ import VerificationDialog from "@/components/VerificationDialog";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { ComponentProps, useState } from "react";
+import { ComponentProps, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod/v4";
 
 const loginFormSchema = z.object({
-  email: z
-    .email()
-    .nonempty("Email is required")
-    .regex(/^\S+@\S+\.\S+$/, "Invalid email address"),
+  email: z.email(),
 });
 
 type LoginFormValues = z.infer<typeof loginFormSchema>;
@@ -38,18 +35,19 @@ const LoginForm = ({ className, ...props }: ComponentProps<"form">) => {
       email: "",
     },
   });
-  const isPending =
-    loginForm.formState.isSubmitting || loginForm.formState.isValidating;
+  const [isPending, startTransition] = useTransition();
 
   const onSubmit = async (values: LoginFormValues) => {
-    const result = await loginWithEmail({ email: values.email });
-    if (result.error) {
-      toast.error("Unable to authenticate", {
-        description: result.error,
-      });
-    } else {
-      setAccountId(result.data!);
-    }
+    startTransition(async () => {
+      const result = await loginWithEmail({ email: values.email });
+      if (result.error) {
+        toast.error("Unable to authenticate", {
+          description: result.error,
+        });
+      } else {
+        setAccountId(result.data!);
+      }
+    });
   };
 
   return (

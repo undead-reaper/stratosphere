@@ -22,10 +22,7 @@ import { z } from "zod/v4";
 
 const signupSchema = z.object({
   fullName: z.string().nonempty("Full name is required"),
-  email: z
-    .email()
-    .nonempty("Email is required")
-    .regex(/^\S+@\S+\.\S+$/, "Invalid email address"),
+  email: z.email(),
 });
 
 type SignupFormValues = z.infer<typeof signupSchema>;
